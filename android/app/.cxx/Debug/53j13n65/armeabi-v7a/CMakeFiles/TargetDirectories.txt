@@ -1,0 +1,2 @@
+/home/samvel/StudioProjects/to_do_list/android/app/.cxx/Debug/53j13n65/armeabi-v7a/CMakeFiles/edit_cache.dir
+/home/samvel/StudioProjects/to_do_list/android/app/.cxx/Debug/53j13n65/armeabi-v7a/CMakeFiles/rebuild_cache.dir
