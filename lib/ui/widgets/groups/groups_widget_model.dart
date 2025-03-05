@@ -1,13 +1,13 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:to_do_list/domain/data_provider/box_manager.dart';
 import 'package:to_do_list/entity/group.dart';
 import 'package:to_do_list/ui/navigation/main_navigation.dart';
 
 class GroupsWidgetModel extends ChangeNotifier {
+  late final Future<Box<Group>> _box;
   var _groups = <Group>[];
   List<Group> get groups => _groups.toList();
 
@@ -19,37 +19,28 @@ class GroupsWidgetModel extends ChangeNotifier {
     Navigator.of(constext).pushNamed(MainNavigatonRouteNames.groupsForm);
   }
 
-  void showTasks(BuildContext context, int groupIndex) async {
-    if (!Hive.isAdapterRegistered(1)) {
-      Hive.registerAdapter(GroupAdapter());
-    }
-    final box = await Hive.openBox<Group>('groups_box');
-    final groupKey = box.keyAt(groupIndex) as int;
+  Future<void> showTasks(BuildContext context, int groupIndex) async {
+    final groupKey = (await _box).keyAt(groupIndex) as int;
 
     unawaited(Navigator.of(context)
         .pushNamed(MainNavigatonRouteNames.tasks, arguments: groupKey));
   }
 
-  void deleteGroup(int groupIndex) async {
-    if (!Hive.isAdapterRegistered(1)) {
-      Hive.registerAdapter(GroupAdapter());
-    }
-    final box = await Hive.openBox<Group>('groups_box');
+  Future<void> deleteGroup(int groupIndex) async {
+    final box = await _box;
     await box.deleteAt(groupIndex);
   }
 
-  void _readGroupsFormHive(Box<Group> box) {
-    _groups = box.values.toList();
+  Future<void> _readGroupsFormHive() async {
+    _groups = (await _box).values.toList();
     notifyListeners();
   }
 
   void setup() async {
-    if (!Hive.isAdapterRegistered(1)) {
-      Hive.registerAdapter(GroupAdapter());
-    }
-    final box = await Hive.openBox<Group>('groups_box');
-    _readGroupsFormHive(box);
-    box.listenable().addListener(() => _readGroupsFormHive(box));
+    _box = BoxManager.instance.openGroupBox();
+    await BoxManager.instance.openTasksBox();
+    _readGroupsFormHive();
+    (await _box).listenable().addListener(_readGroupsFormHive);
   }
 }
 
