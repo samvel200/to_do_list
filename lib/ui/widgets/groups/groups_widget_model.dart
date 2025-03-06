@@ -5,6 +5,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:to_do_list/domain/data_provider/box_manager.dart';
 import 'package:to_do_list/entity/group.dart';
 import 'package:to_do_list/ui/navigation/main_navigation.dart';
+import 'package:to_do_list/ui/widgets/tasks/tasks_widget.dart';
 
 class GroupsWidgetModel extends ChangeNotifier {
   late final Future<Box<Group>> _box;
@@ -15,19 +16,26 @@ class GroupsWidgetModel extends ChangeNotifier {
     setup();
   }
 
-  void showForm(BuildContext constext) {
-    Navigator.of(constext).pushNamed(MainNavigatonRouteNames.groupsForm);
+  void showForm(BuildContext context) {
+    Navigator.of(context).pushNamed(MainNavigatonRouteNames.groupsForm);
   }
 
   Future<void> showTasks(BuildContext context, int groupIndex) async {
-    final groupKey = (await _box).keyAt(groupIndex) as int;
+    final group = (await _box).getAt(groupIndex);
+    if (group != null) {
+      final configuration =
+          TasksWidgetConfiguration(group.key as int, group.name);
 
-    unawaited(Navigator.of(context)
-        .pushNamed(MainNavigatonRouteNames.tasks, arguments: groupKey));
+      unawaited(Navigator.of(context)
+          .pushNamed(MainNavigatonRouteNames.tasks, arguments: configuration));
+    }
   }
 
   Future<void> deleteGroup(int groupIndex) async {
     final box = await _box;
+    final groupKey = (await _box).keyAt(groupIndex) as int;
+    final taskBoxName = BoxManager.instance.makeTaskBoxName(groupKey);
+    Hive.deleteBoxFromDisk(taskBoxName);
     await box.deleteAt(groupIndex);
   }
 
@@ -38,7 +46,7 @@ class GroupsWidgetModel extends ChangeNotifier {
 
   void setup() async {
     _box = BoxManager.instance.openGroupBox();
-    await BoxManager.instance.openTasksBox();
+
     _readGroupsFormHive();
     (await _box).listenable().addListener(_readGroupsFormHive);
   }

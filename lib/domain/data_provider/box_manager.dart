@@ -10,14 +10,16 @@ class BoxManager {
     return _openBox('groups_box', 1, GroupAdapter());
   }
 
-  Future<Box<Task>> openTasksBox() async {
-    return _openBox('tasks_box', 2, TaskAdapter());
+  Future<Box<Task>> openTasksBox(int groupKey) async {
+    return _openBox(makeTaskBoxName(groupKey), 2, TaskAdapter());
   }
 
   Future<void> closeBox<T>(Box<T> box) async {
     await box.compact();
     await box.close();
   }
+
+  String makeTaskBoxName(int groupKey) => 'tasks_box_$groupKey';
 
   Future<Box<T>> _openBox<T>(
       String name, int typeId, TypeAdapter<T> adapter) async {
