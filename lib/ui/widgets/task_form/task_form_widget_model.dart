@@ -10,7 +10,7 @@ class TaskFormWidgetModel {
     required this.groupKey,
   });
 
-  void saveTask(BuildContext context) async {
+  Future<void> saveTask(BuildContext context) async {
     if (tasksText.isEmpty) return;
 
     final task = Task(text: tasksText, isDone: false);
