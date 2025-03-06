@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:to_do_list/domain/data_provider/box_manager.dart';
@@ -9,11 +10,14 @@ import 'package:to_do_list/ui/widgets/tasks/tasks_widget.dart';
 
 class GroupsWidgetModel extends ChangeNotifier {
   late final Future<Box<Group>> _box;
+  ValueListenable<Object>? _listenableBox;
+
   var _groups = <Group>[];
+
   List<Group> get groups => _groups.toList();
 
   GroupsWidgetModel() {
-    setup();
+    _setup();
   }
 
   void showForm(BuildContext context) {
@@ -44,11 +48,19 @@ class GroupsWidgetModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setup() async {
+  void _setup() async {
     _box = BoxManager.instance.openGroupBox();
 
     _readGroupsFormHive();
-    (await _box).listenable().addListener(_readGroupsFormHive);
+    _listenableBox = (await _box).listenable();
+    _listenableBox?.addListener(_readGroupsFormHive);
+  }
+
+  @override
+  void dispose() async {
+    _listenableBox?.removeListener(_readGroupsFormHive);
+    await BoxManager.instance.closeBox((await _box));
+    super.dispose();
   }
 }
 

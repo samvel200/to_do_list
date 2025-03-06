@@ -9,9 +9,8 @@ class GroupFormWidgetModel {
 
     final box = await BoxManager.instance.openGroupBox();
     final group = Group(name: groupName);
-
     await box.add(group);
-
+    // await BoxManager.instance.closeBox(box);
     // ignore: use_build_context_synchronously
     Navigator.of(context).pop();
   }
