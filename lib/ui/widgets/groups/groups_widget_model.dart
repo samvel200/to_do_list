@@ -30,6 +30,7 @@ class GroupsWidgetModel extends ChangeNotifier {
       final configuration =
           TasksWidgetConfiguration(group.key as int, group.name);
 
+      // ignore: use_build_context_synchronously
       unawaited(Navigator.of(context)
           .pushNamed(MainNavigatonRouteNames.tasks, arguments: configuration));
     }
